@@ -43,7 +43,8 @@
 
   outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, edhm, edmc, vscode-mutable, zsh-p10k-config, claude-code, katnix-commands, ... }@inputs: 
   let
-    mkSystem = machineConfig: nixpkgs.lib.nixosSystem {
+    machineConfig = import ./machines/machine.nix;
+    mkSystem = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs machineConfig; };
       modules = [
@@ -63,8 +64,7 @@
     };
   in {
     nixosConfigurations = {
-      Katnix-Desktop = mkSystem (import ./machines/katnix-desktop.nix);
-      Katnix-Laptop = mkSystem (import ./machines/katnix-laptop.nix);
+      default = mkSystem;
     };
   };
 }

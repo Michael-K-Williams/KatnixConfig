@@ -200,11 +200,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1755543424,
-        "narHash": "sha256-WhaqQsMNhBsDuUcIFAOhjSvYuvg1sDCSMZjtLsxljQk=",
+        "lastModified": 1755544390,
+        "narHash": "sha256-yEjQNuZPiLKklOtcPgh9c78Yus2sGZcNvmENtz/Zdjs=",
         "owner": "Michael-K-Williams",
         "repo": "Katnix-Commands",
-        "rev": "566cfdf0de9e488add04254921f4945564fccf62",
+        "rev": "cf304be70b8b98c52f8d99ba4530903eb913fe62",
         "type": "github"
       },
       "original": {
