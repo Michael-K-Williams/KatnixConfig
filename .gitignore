@@ -1,0 +1,23 @@
+# Claude AI files
+.claude/
+*.claude
+
+# Nix build results
+result
+result-*
+
+# Hardware configuration (machine-specific)
+hardware-configuration.nix
+
+# Temporary files
+*~
+.#*
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Direnv
+.direnv/
