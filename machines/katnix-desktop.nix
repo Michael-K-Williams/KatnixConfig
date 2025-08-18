@@ -4,18 +4,17 @@
   hostName = "Katnix-Desktop";
   machineType = "Desktop";
   
-  # User configuration
-  userName = "thealtkitkat";
+  # User configuration (will be overridden by installer)
+  userName = "thealtkitkat";  # Default username - installer will update this
   userDescription = "Kat";
   
-  # Paths
-  configPath = "/home/thealtkitkat/nixos";
-  backgroundImagePath = "/home/thealtkitkat/nixos/nix-dark.png";
+  # Paths (relative to configuration directory)
+  backgroundImagePath = ./kat.png;
   
   # Hardware-specific imports
   hardwareImports = [
-    ../nvidia.nix
-    # ../intel-graphics.nix  # Commented out for desktop
+    ./nvidia.nix
+    # ./intel-graphics.nix  # Commented out for desktop
   ];
   
   # Display configuration

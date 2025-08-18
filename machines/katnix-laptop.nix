@@ -8,14 +8,13 @@
   userName = "thealtkitkat";
   userDescription = "Kat";
   
-  # Paths
-  configPath = "/home/thealtkitkat/nixos";
-  backgroundImagePath = "/home/thealtkitkat/nixos/nix-dark.png";
+  # Paths (relative to configuration directory)
+  backgroundImagePath = ./kat.png;
   
   # Hardware-specific imports
   hardwareImports = [
-    ../intel-graphics.nix
-    # ../nvidia.nix  # Commented out for laptop
+    ./intel-graphics.nix
+    # ./nvidia.nix  # Commented out for laptop
   ];
   
   # Display configuration
