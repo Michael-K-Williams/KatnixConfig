@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 {
   # Font configuration
   fonts = {
@@ -63,5 +63,6 @@
     kdePackages.konversation
     kdePackages.ghostwriter
     polkit
+    inputs.katnix-commands.packages.${pkgs.system}.default
   ];
 }

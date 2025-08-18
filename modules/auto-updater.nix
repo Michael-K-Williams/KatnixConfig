@@ -1,137 +1,7 @@
 { config, pkgs, machineConfig, lib, ... }:
 
 let
-  # Webhook listener script
-  webhookListener = pkgs.writeScriptBin "katnix-webhook-listener" ''
-    #!${pkgs.bash}/bin/bash
-    
-    # Simple HTTP server to listen for GitHub webhooks
-    ${pkgs.python3}/bin/python3 << 'EOF'
-    import http.server
-    import socketserver
-    import json
-    import subprocess
-    import os
-    import sys
-    import hashlib
-    import hmac
-    from urllib.parse import urlparse, parse_qs
-    
-    PORT = 8080
-    CONFIG_DIR = "${config.users.users.${machineConfig.userName}.home}/nixos"
-    LOG_FILE = "/var/log/katnix-updater.log"
-    
-    def log_message(msg):
-        timestamp = subprocess.check_output(["date", "+%Y-%m-%d %H:%M:%S"]).decode().strip()
-        with open(LOG_FILE, "a") as f:
-            f.write(f"[{timestamp}] {msg}\n")
-        print(f"[{timestamp}] {msg}")
-    
-    def verify_signature(payload, signature, secret):
-        """Verify GitHub webhook signature"""
-        if not signature:
-            return False
-        
-        expected = hmac.new(
-            secret.encode('utf-8'),
-            payload,
-            hashlib.sha256
-        ).hexdigest()
-        
-        return hmac.compare_digest(f"sha256={expected}", signature)
-    
-    def update_system(notification_data):
-        """Update the Katnix system"""
-        try:
-            log_message(f"Starting update for commit {notification_data.get('commit_sha', 'unknown')}")
-            
-            # Change to config directory
-            os.chdir(CONFIG_DIR)
-            
-            # Pull latest changes
-            result = subprocess.run(["git", "pull"], capture_output=True, text=True)
-            if result.returncode != 0:
-                log_message(f"Git pull failed: {result.stderr}")
-                return False
-            
-            # Update flake inputs
-            result = subprocess.run(["nix", "flake", "update"], capture_output=True, text=True)
-            if result.returncode != 0:
-                log_message(f"Flake update failed: {result.stderr}")
-                return False
-            
-            # Get hostname for rebuild
-            hostname = "${machineConfig.hostName}".replace("-", "").lower()
-            
-            # Rebuild system
-            rebuild_cmd = ["sudo", "nixos-rebuild", "switch", "--flake", f".#{hostname}"]
-            result = subprocess.run(rebuild_cmd, capture_output=True, text=True)
-            
-            if result.returncode == 0:
-                log_message("System update completed successfully")
-                return True
-            else:
-                log_message(f"System rebuild failed: {result.stderr}")
-                return False
-                
-        except Exception as e:
-            log_message(f"Update failed with exception: {str(e)}")
-            return False
-    
-    class WebhookHandler(http.server.BaseHTTPRequestHandler):
-        def do_POST(self):
-            if self.path == "/webhook/katnix-update":
-                content_length = int(self.headers['Content-Length'])
-                post_data = self.rfile.read(content_length)
-                
-                # Verify signature (optional - comment out if not using secrets)
-                # signature = self.headers.get('X-Hub-Signature-256')
-                # if not verify_signature(post_data, signature, os.environ.get('KATNIX_WEBHOOK_SECRET', '')):
-                #     self.send_response(401)
-                #     self.end_headers()
-                #     log_message("Webhook signature verification failed")
-                #     return
-                
-                try:
-                    notification = json.loads(post_data.decode('utf-8'))
-                    log_message(f"Received update notification: {notification.get('commit_message', 'No message')}")
-                    
-                    # Update system in background
-                    if update_system(notification):
-                        self.send_response(200)
-                        self.send_header('Content-type', 'application/json')
-                        self.end_headers()
-                        self.wfile.write(json.dumps({"status": "success", "message": "Update started"}).encode())
-                    else:
-                        self.send_response(500)
-                        self.send_header('Content-type', 'application/json')
-                        self.end_headers()
-                        self.wfile.write(json.dumps({"status": "error", "message": "Update failed"}).encode())
-                        
-                except Exception as e:
-                    log_message(f"Error processing webhook: {str(e)}")
-                    self.send_response(400)
-                    self.end_headers()
-            else:
-                self.send_response(404)
-                self.end_headers()
-        
-        def log_message(self, format, *args):
-            # Suppress default HTTP logging
-            pass
-    
-    log_message("Starting Katnix webhook listener on port 8080")
-    
-    with socketserver.TCPServer(("", PORT), WebhookHandler) as httpd:
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            log_message("Webhook listener stopped")
-            sys.exit(0)
-    EOF
-  '';
-
-  # Script to check for updates on boot/network change
+  # Script to check for updates and apply them
   updateChecker = pkgs.writeScriptBin "katnix-update-checker" ''
     #!${pkgs.bash}/bin/bash
     
@@ -172,12 +42,6 @@ let
     LOCAL_COMMIT=$(${pkgs.git}/bin/git rev-parse HEAD)
     REMOTE_COMMIT=$(${pkgs.git}/bin/git rev-parse origin/main)
     
-    # Get last update timestamp
-    LAST_UPDATE="0"
-    if [ -f "$LAST_UPDATE_FILE" ]; then
-        LAST_UPDATE=$(cat "$LAST_UPDATE_FILE")
-    fi
-    
     if [ "$LOCAL_COMMIT" != "$REMOTE_COMMIT" ]; then
         log_message "Updates available (local: $LOCAL_COMMIT, remote: $REMOTE_COMMIT)"
         
@@ -189,44 +53,46 @@ let
         # Create notification for the user
         ${pkgs.libnotify}/bin/notify-send \
             "Katnix Updates Available" \
-            "System configuration has been updated. Click to apply changes." \
+            "System configuration has been updated. Applying changes automatically..." \
             --icon=software-update-available \
             --urgency=normal \
-            --app-name="Katnix Updater" \
-            --action="apply=Apply Updates" \
-            --action="dismiss=Dismiss" || true
+            --app-name="Katnix Updater" || true
         
-        # Auto-update if configured (could be made optional)
-        if [ "''${KATNIX_AUTO_UPDATE:-true}" = "true" ]; then
-            log_message "Auto-update enabled, applying changes..."
+        log_message "Applying updates automatically..."
+        
+        # Pull changes
+        if ! ${pkgs.git}/bin/git pull origin main; then
+            log_message "Git pull failed"
+            exit 1
+        fi
+        
+        # Update flake inputs
+        if ! ${pkgs.nix}/bin/nix flake update; then
+            log_message "Flake update failed"
+            exit 1
+        fi
+        
+        # Rebuild system
+        hostname_key=$(echo "${machineConfig.hostName}" | tr '[:upper:]' '[:lower:]' | sed 's/-//g')
+        if sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ".#$hostname_key"; then
+            log_message "System update completed successfully"
+            echo "$(date +%s)" > "$LAST_UPDATE_FILE"
             
-            # Pull changes
-            ${pkgs.git}/bin/git pull origin main
-            
-            # Update flake
-            ${pkgs.nix}/bin/nix flake update
-            
-            # Rebuild system
-            hostname_key=$(echo "${machineConfig.hostName}" | tr '[:upper:]' '[:lower:]' | sed 's/-//g')
-            if sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ".#$hostname_key"; then
-                log_message "System update completed successfully"
-                echo "$(date +%s)" > "$LAST_UPDATE_FILE"
-                
-                ${pkgs.libnotify}/bin/notify-send \
-                    "Katnix Update Complete" \
-                    "System has been successfully updated." \
-                    --icon=software-update-available \
-                    --urgency=normal \
-                    --app-name="Katnix Updater" || true
-            else
-                log_message "System update failed"
-                ${pkgs.libnotify}/bin/notify-send \
-                    "Katnix Update Failed" \
-                    "System update encountered an error. Check logs for details." \
-                    --icon=dialog-error \
-                    --urgency=critical \
-                    --app-name="Katnix Updater" || true
-            fi
+            ${pkgs.libnotify}/bin/notify-send \
+                "Katnix Update Complete" \
+                "System has been successfully updated and rebuilt." \
+                --icon=software-update-available \
+                --urgency=normal \
+                --app-name="Katnix Updater" || true
+        else
+            log_message "System update failed during rebuild"
+            ${pkgs.libnotify}/bin/notify-send \
+                "Katnix Update Failed" \
+                "System update encountered an error during rebuild. Check logs for details." \
+                --icon=dialog-error \
+                --urgency=critical \
+                --app-name="Katnix Updater" || true
+            exit 1
         fi
     else
         log_message "System is up to date"
@@ -234,31 +100,9 @@ let
   '';
 
 in {
-  # Create the systemd services
-  systemd.services.katnix-webhook-listener = {
-    description = "Katnix Webhook Listener";
-    after = [ "network.target" ];
-    wantedBy = [ "multi-user.target" ];
-    
-    serviceConfig = {
-      Type = "simple";
-      User = "katnix-updater";
-      Group = "katnix-updater";
-      ExecStart = "${webhookListener}/bin/katnix-webhook-listener";
-      Restart = "always";
-      RestartSec = 10;
-      
-      # Security settings
-      NoNewPrivileges = true;
-      PrivateTmp = true;
-      ProtectSystem = "strict";
-      ProtectHome = true;
-      ReadWritePaths = [ "/var/log" "/var/lib/katnix-updater" "${config.users.users.${machineConfig.userName}.home}/nixos" ];
-    };
-  };
-
+  # Main update service
   systemd.services.katnix-update-checker = {
-    description = "Check for Katnix configuration updates";
+    description = "Check for Katnix configuration updates and apply them";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     
@@ -275,51 +119,53 @@ in {
     };
   };
 
-  # Timer to run update checker periodically
-  systemd.timers.katnix-update-checker = {
-    description = "Timer for Katnix update checker";
+  # Timer to run every 30 minutes at :00 and :30
+  systemd.timers.katnix-update-timer = {
+    description = "Timer for Katnix update checker - runs every 30 minutes";
     wantedBy = [ "timers.target" ];
     
     timerConfig = {
-      OnBootSec = "2min";  # Check 2 minutes after boot
-      OnUnitActiveSec = "30min";  # Check every 30 minutes
+      OnCalendar = "*:00/30:00";  # Every 30 minutes at :00 and :30
       Persistent = true;
+      RandomizedDelaySec = "60";  # Random delay up to 1 minute to avoid GitHub rate limits
+      Unit = "katnix-update-checker.service";
     };
   };
 
-  # Network connectivity trigger
-  systemd.services.katnix-network-trigger = {
-    description = "Trigger Katnix update check on network changes";
+  # Check for updates on boot (after 5 minutes to let system settle)
+  systemd.services.katnix-boot-update-check = {
+    description = "Check for Katnix updates on boot";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
     
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${pkgs.systemd}/bin/systemctl start katnix-update-checker.service";
       RemainAfterExit = true;
     };
+  };
+
+  systemd.timers.katnix-boot-update-timer = {
+    description = "Delayed boot update check";
+    after = [ "katnix-boot-update-check.service" ];
     
-    wantedBy = [ "network-online.target" ];
+    timerConfig = {
+      OnBootSec = "5min";  # Check 5 minutes after boot
+      Unit = "katnix-update-checker.service";
+    };
+    
+    wantedBy = [ "timers.target" ];
   };
 
-  # Create user for webhook service
-  users.users.katnix-updater = {
-    isSystemUser = true;
-    group = "katnix-updater";
-    home = "/var/lib/katnix-updater";
-    createHome = true;
-  };
-
-  users.groups.katnix-updater = {};
-
-  # Create log directory
+  # Create log directory and permissions
   systemd.tmpfiles.rules = [
     "d /var/log 0755 root root -"
-    "f /var/log/katnix-updater.log 0644 katnix-updater katnix-updater -"
-    "d /var/lib/katnix-updater 0755 katnix-updater katnix-updater -"
+    "f /var/log/katnix-updater.log 0644 ${machineConfig.userName} ${machineConfig.userName} -"
+    "d /var/lib/katnix-updater 0755 ${machineConfig.userName} ${machineConfig.userName} -"
   ];
 
-  # Add sudo permissions for the update user
+  # Add sudo permissions for nixos-rebuild
   security.sudo.extraRules = [{
     users = [ machineConfig.userName ];
     commands = [{
@@ -327,12 +173,4 @@ in {
       options = [ "NOPASSWD" ];
     }];
   }];
-
-  # Environment variables for configuration
-  environment.variables = {
-    KATNIX_AUTO_UPDATE = "true";  # Set to false to disable auto-updates
-  };
-  
-  # Open firewall port for webhook (optional - only if you want external access)
-  # networking.firewall.allowedTCPPorts = [ 8080 ];
 }

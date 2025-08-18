@@ -82,13 +82,11 @@ If you prefer manual setup:
 - **Conditional features**: Based on machine type and requirements
 
 ### Auto-Update System
-- **GitHub Actions**: Automatically notify machines when configuration changes
-- **Webhook Listener**: Real-time updates when changes are pushed
-- **Offline Recovery**: Machines catch up when they reconnect
-- **Manual Control**: Enable/disable auto-updates as needed
+- **Automated Updates**: Checks for changes every 30 minutes (at :00 and :30)
+- **Pull-Based**: No port forwarding or webhooks needed
+- **Smart Updates**: Only rebuilds when actual changes are detected
+- **Manual Control**: `katnix update` command for immediate checks
 - **Desktop Notifications**: Stay informed about update status
-
-See [AUTO-UPDATER.md](AUTO-UPDATER.md) for detailed information.
 
 ### External Dependencies
 - **ZSH/P10k**: [My-ZshP10k-Nix](https://github.com/Michael-K-Williams/My-ZshP10k-Nix)

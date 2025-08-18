@@ -15,36 +15,30 @@ let
     Commands:
         status      Show updater service status
         logs        Show updater logs
-        enable      Enable auto-updates
-        disable     Disable auto-updates
-        check       Manually check for updates
+        check       Manually check for updates now
         update      Manually trigger update
-        restart     Restart webhook listener
+        restart     Restart update timer
         help        Show this help message
     
     Examples:
         katnix-control status       # Check if services are running
         katnix-control logs         # View recent update logs
-        katnix-control disable      # Disable automatic updates
-        katnix-control check        # Check for updates now
+        katnix-control check        # Check for updates immediately
+        katnix-control update       # Force update even if no changes
     EOF
     }
     
     show_status() {
         echo "=== Katnix Auto-Updater Status ==="
         echo
-        echo "Webhook Listener:"
-        systemctl --no-pager status katnix-webhook-listener.service
+        echo "Update Timer:"
+        systemctl --no-pager status katnix-update-timer.timer
         echo
-        echo "Update Checker Timer:"
-        systemctl --no-pager status katnix-update-checker.timer
+        echo "Last Update Check:"
+        systemctl --no-pager status katnix-update-checker.service | head -20
         echo
-        echo "Auto-Update Setting:"
-        if [ "''${KATNIX_AUTO_UPDATE:-true}" = "true" ]; then
-            echo "  ✅ Enabled"
-        else
-            echo "  ❌ Disabled"
-        fi
+        echo "Timer Schedule:"
+        systemctl list-timers katnix-update-timer.timer
     }
     
     show_logs() {
@@ -54,44 +48,36 @@ let
         else
             echo "No logs found"
         fi
-    }
-    
-    enable_auto_update() {
-        echo "Enabling auto-updates..."
-        echo "KATNIX_AUTO_UPDATE=true" | sudo tee /etc/environment.d/katnix-updater.conf > /dev/null
-        echo "✅ Auto-updates enabled. Changes will take effect after next login or reboot."
-    }
-    
-    disable_auto_update() {
-        echo "Disabling auto-updates..."
-        echo "KATNIX_AUTO_UPDATE=false" | sudo tee /etc/environment.d/katnix-updater.conf > /dev/null
-        echo "❌ Auto-updates disabled. Changes will take effect after next login or reboot."
-        echo "Note: You can still manually update using 'katnix-control update'"
+        echo
+        echo "=== Recent Systemd Journal Entries ==="
+        journalctl -u katnix-update-checker.service -n 20 --no-pager
     }
     
     check_updates() {
-        echo "Checking for updates..."
+        echo "🔍 Checking for updates immediately..."
         systemctl start katnix-update-checker.service
-        echo "Check complete. Use 'katnix-control logs' to see results."
+        echo "✅ Update check started. Use 'katnix-control logs' to see results."
+        echo "💡 You can also follow live: journalctl -f -u katnix-update-checker.service"
     }
     
     manual_update() {
-        echo "Starting manual update..."
+        echo "🚀 Starting manual update..."
         cd ${config.users.users.${machineConfig.userName}.home}/nixos || {
             echo "❌ Config directory not found"
             exit 1
         }
         
-        echo "Pulling latest changes..."
+        echo "📥 Pulling latest changes..."
         git pull origin main
         
-        echo "Updating flake inputs..."
+        echo "🔄 Updating flake inputs..."
         nix flake update
         
-        echo "Rebuilding system..."
+        echo "🔨 Rebuilding system..."
         hostname_key=$(echo "${machineConfig.hostName}" | tr '[:upper:]' '[:lower:]' | sed 's/-//g')
         if sudo nixos-rebuild switch --flake ".#$hostname_key"; then
             echo "✅ Update completed successfully"
+            echo "$(date +%s)" | sudo tee /var/lib/katnix-updater/last-update > /dev/null
         else
             echo "❌ Update failed"
             exit 1
@@ -99,10 +85,10 @@ let
     }
     
     restart_services() {
-        echo "Restarting Katnix updater services..."
-        sudo systemctl restart katnix-webhook-listener.service
-        sudo systemctl restart katnix-update-checker.timer
-        echo "✅ Services restarted"
+        echo "🔄 Restarting Katnix updater services..."
+        sudo systemctl restart katnix-update-timer.timer
+        echo "✅ Timer restarted. Next check will run at scheduled time."
+        systemctl list-timers katnix-update-timer.timer
     }
     
     case "''${1:-help}" in
@@ -111,12 +97,6 @@ let
             ;;
         logs)
             show_logs
-            ;;
-        enable)
-            enable_auto_update
-            ;;
-        disable)
-            disable_auto_update
             ;;
         check)
             check_updates
@@ -131,7 +111,7 @@ let
             show_help
             ;;
         *)
-            echo "Unknown command: $1"
+            echo "❌ Unknown command: $1"
             echo "Use 'katnix-control help' for usage information"
             exit 1
             ;;

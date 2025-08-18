@@ -35,9 +35,13 @@
       url = "github:Michael-K-Williams/Claude-Code-Nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    katnix-commands = {
+      url = "github:Michael-K-Williams/Katnix-Commands";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, edhm, edmc, vscode-mutable, zsh-p10k-config, claude-code, ... }@inputs: 
+  outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, edhm, edmc, vscode-mutable, zsh-p10k-config, claude-code, katnix-commands, ... }@inputs: 
   let
     mkSystem = machineConfig: nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
