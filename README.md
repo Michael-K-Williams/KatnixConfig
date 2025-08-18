@@ -81,6 +81,15 @@ If you prefer manual setup:
 - **Graphics**: Automatic Intel or NVIDIA configuration
 - **Conditional features**: Based on machine type and requirements
 
+### Auto-Update System
+- **GitHub Actions**: Automatically notify machines when configuration changes
+- **Webhook Listener**: Real-time updates when changes are pushed
+- **Offline Recovery**: Machines catch up when they reconnect
+- **Manual Control**: Enable/disable auto-updates as needed
+- **Desktop Notifications**: Stay informed about update status
+
+See [AUTO-UPDATER.md](AUTO-UPDATER.md) for detailed information.
+
 ### External Dependencies
 - **ZSH/P10k**: [My-ZshP10k-Nix](https://github.com/Michael-K-Williams/My-ZshP10k-Nix)
 - **Claude Code**: [Claude-Code-Nix](https://github.com/Michael-K-Williams/Claude-Code-Nix)
