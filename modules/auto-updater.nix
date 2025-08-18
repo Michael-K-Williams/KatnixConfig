@@ -73,8 +73,7 @@ let
         fi
         
         # Rebuild system
-        hostname_key=$(echo "${machineConfig.hostName}" | tr '[:upper:]' '[:lower:]' | sed 's/-//g')
-        if sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ".#$hostname_key"; then
+        if sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ".#default" --impure; then
             log_message "System update completed successfully"
             echo "$(date +%s)" > "$LAST_UPDATE_FILE"
             
@@ -103,16 +102,26 @@ in {
   # Main update service
   systemd.services.katnix-update-checker = {
     description = "Check for Katnix configuration updates and apply them";
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
+    after = [ "network-online.target" "systemd-tmpfiles-setup.service" ];
+    wants = [ "network-online.target" "systemd-tmpfiles-setup.service" ];
     
     serviceConfig = {
       Type = "oneshot";
       User = machineConfig.userName;
+      Group = "users";
       ExecStart = "${updateChecker}/bin/katnix-update-checker";
+      Environment = [ "PATH=${pkgs.lib.makeBinPath [ pkgs.git pkgs.nix pkgs.nixos-rebuild pkgs.coreutils pkgs.libnotify ]}" ];
       
-      # Security settings
-      NoNewPrivileges = true;
+      # Ensure directories exist before running
+      ExecStartPre = [
+        "+${pkgs.coreutils}/bin/mkdir -p /var/lib/katnix-updater"
+        "+${pkgs.coreutils}/bin/chown ${machineConfig.userName}:users /var/lib/katnix-updater"
+        "+${pkgs.coreutils}/bin/touch /var/log/katnix-updater.log"  
+        "+${pkgs.coreutils}/bin/chown ${machineConfig.userName}:users /var/log/katnix-updater.log"
+      ];
+      
+      # Security settings  
+      NoNewPrivileges = false;  # Need privileges for ExecStartPre commands
       PrivateTmp = true;
       ProtectSystem = "strict";
       ReadWritePaths = [ "/var/log" "/var/lib/katnix-updater" "${config.users.users.${machineConfig.userName}.home}/nixos" ];
