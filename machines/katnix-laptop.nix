@@ -9,12 +9,12 @@
   userDescription = "Kat";
   
   # Paths (relative to configuration directory)
-  backgroundImagePath = ./kat.png;
+  backgroundImagePath = ../kat.png;
   
   # Hardware-specific imports
   hardwareImports = [
-    ./intel-graphics.nix
-    # ./nvidia.nix  # Commented out for laptop
+    ../intel-graphics.nix
+    # ../nvidia.nix  # Commented out for laptop
   ];
   
   # Display configuration

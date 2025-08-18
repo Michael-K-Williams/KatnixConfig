@@ -15,7 +15,7 @@
       theme = "breeze";
       settings = {
         Theme = {
-          Background = machineConfig.backgroundImagePath;
+          Background = toString machineConfig.backgroundImagePath;
         };
       };
     };

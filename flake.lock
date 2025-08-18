@@ -401,11 +401,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1755537860,
-        "narHash": "sha256-xRRC3CYvXvoD0Ezq53IJHhL4+mz34K9uplWe8/RcScM=",
+        "lastModified": 1755543532,
+        "narHash": "sha256-taAZ65ZnkBfUg/b/8sR+prYh7jSw49e5KBkhPiquipU=",
         "owner": "Michael-K-Williams",
         "repo": "My-ZshP10k-Nix",
-        "rev": "446af4c8aaf33aae940e1668cc8b9b4320dd9ce3",
+        "rev": "6f5d5f510c56c4e1c1087ef7a5cc2b46a202a5e0",
         "type": "github"
       },
       "original": {

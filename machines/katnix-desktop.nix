@@ -1,36 +1,15 @@
-# Machine-specific configuration for Katnix Desktop
 {
-  # Machine identification
   hostName = "Katnix-Desktop";
-  machineType = "Desktop";
+  userName = "thealtkitkat";
+  userDescription = "Katnix User";
+  backgroundImagePath = ../kat.png;
   
-  # User configuration (will be overridden by installer)
-  userName = "thealtkitkat";  # Default username - installer will update this
-  userDescription = "Kat";
-  
-  # Paths (relative to configuration directory)
-  backgroundImagePath = ./kat.png;
-  
-  # Hardware-specific imports
+  # Hardware imports based on graphics type
   hardwareImports = [
-    ./nvidia.nix
-    # ./intel-graphics.nix  # Commented out for desktop
+    ../nvidia.nix
   ];
   
-  # Display configuration
-  displayManager = {
-    enable = true;
-    theme = "breeze";
-  };
-  
-  # Desktop environment
-  desktopManager = {
-    plasma6.enable = true;
-  };
-  
-  # Graphics (can be "nvidia", "intel", or "hybrid")
-  graphics = "nvidia";
-  
-  # Elite Dangerous applications
+  # Machine type configuration
+  machineType = "desktop";
   includeEliteDangerous = true;
 }
