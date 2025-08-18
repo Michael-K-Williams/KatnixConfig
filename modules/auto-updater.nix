@@ -14,10 +14,6 @@ let
         echo "[$timestamp] $1" | tee -a "$LOG_FILE"
     }
     
-    # Ensure directories exist
-    mkdir -p "$(dirname "$LAST_UPDATE_FILE")"
-    mkdir -p "$(dirname "$LOG_FILE")"
-    
     # Wait for network connectivity
     log_message "Checking for network connectivity..."
     for i in {1..30}; do
@@ -103,7 +99,8 @@ in {
   systemd.services.katnix-update-checker = {
     description = "Check for Katnix configuration updates and apply them";
     after = [ "network-online.target" "systemd-tmpfiles-setup.service" ];
-    wants = [ "network-online.target" "systemd-tmpfiles-setup.service" ];
+    wants = [ "network-online.target" ];
+    requires = [ "systemd-tmpfiles-setup.service" ];
     
     serviceConfig = {
       Type = "oneshot";
@@ -123,7 +120,7 @@ in {
       # Security settings  
       NoNewPrivileges = false;  # Need privileges for ExecStartPre commands
       PrivateTmp = true;
-      ProtectSystem = "strict";
+      ProtectSystem = "false";  # Disable to avoid mount namespace conflicts
       ReadWritePaths = [ "/var/log" "/var/lib/katnix-updater" "${config.users.users.${machineConfig.userName}.home}/nixos" ];
     };
   };
