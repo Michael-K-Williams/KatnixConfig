@@ -45,24 +45,67 @@
 
   # System packages
   environment.systemPackages = with pkgs; [
+    # Core system tools
     vim 
     wget
+    curl
     git
     gh
+    unzip
+    htop
+    
+    # Terminal and shell
     alacritty
-    firefox
     zsh
-    claude-code
-    vesktop
-    spotify
     fastfetch
     bat
     lsd
+    tree
+    
+    # Desktop applications
+    firefox
+    claude-code
+    vesktop
+    spotify
+    steam
+    libreoffice
+    thunderbird
+    
+    # KDE packages
     kdePackages.sddm-kcm
     kdePackages.kcalc
     kdePackages.konversation
     kdePackages.ghostwriter
+    kdePackages.kate
+    kdePackages.dolphin
+    kdePackages.spectacle
+    kdePackages.okular
+    
+    # Development tools
+    vscode
+    
+    # System utilities
     polkit
+    networkmanagerapplet
+    
+    # Gaming
+    lutris
+    wine
+    winetricks
+    
+    # Media
+    vlc
+    gimp
+    
+    # Katnix command tool
     inputs.katnix-commands.packages.${pkgs.system}.default
   ];
+  
+  # Enable Steam
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true;
+    dedicatedServer.openFirewall = true;
+    localNetworkGameTransfers.openFirewall = true;
+  };
 }
