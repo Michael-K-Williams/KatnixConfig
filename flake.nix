@@ -39,13 +39,9 @@
       url = "github:Michael-K-Williams/Katnix-Commands";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    grub-xenlism-nixos = {
-      url = "github:MathiasSven/grub-xenlism-nixos";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, edhm, edmc, vscode-mutable, zsh-p10k-config, claude-code, katnix-commands, grub-xenlism-nixos, ... }@inputs: 
+  outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, edhm, edmc, vscode-mutable, zsh-p10k-config, claude-code, katnix-commands, ... }@inputs: 
   let
     machineConfig = import ./machines/machine.nix;
     mkSystem = nixpkgs.lib.nixosSystem {
