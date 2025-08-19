@@ -82,7 +82,7 @@
     kdePackages.okular
     
     # Development tools
-    vscode
+    # VSCode provided by vscode-mutable module (FHS environment + mutable installation)
     
     # System utilities
     polkit
