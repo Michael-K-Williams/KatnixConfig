@@ -11,7 +11,6 @@
     ./modules/packages.nix
     ./modules/users.nix
     ./modules/elite-dangerous.nix
-    ./modules/auto-updater.nix
     ./modules/katnix-control.nix
   ] ++ machineConfig.hardwareImports;
 
