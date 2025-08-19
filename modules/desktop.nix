@@ -10,14 +10,9 @@
       };
     };
     
-    displayManager.sddm = {
+    displayManager.gdm = {
       enable = true;
-      theme = "breeze";
-      settings = {
-        Theme = {
-          Background = toString machineConfig.backgroundImagePath;
-        };
-      };
+      wayland = true;
     };
     
     desktopManager.plasma6.enable = true;
