@@ -200,11 +200,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1755545059,
-        "narHash": "sha256-S38MMYDEwXu+xlYM0R58OaC/TpQWI/zRUGsusWrFHfs=",
+        "lastModified": 1755545402,
+        "narHash": "sha256-ugYqgiIU3lXtAdWsoCpO358BLTE2ne9Hlf4KarSACeI=",
         "owner": "Michael-K-Williams",
         "repo": "Katnix-Commands",
-        "rev": "2c6d86d5d7b71c756227fceda5f6a671d2b2bff0",
+        "rev": "007475ea746ed1e45ecc62bee53ffc2643784180",
         "type": "github"
       },
       "original": {
@@ -379,11 +379,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1755537208,
-        "narHash": "sha256-y87WAhr3cW3yEpSzBuiTWEzed3lL5/IpSGIxJVjTDyM=",
+        "lastModified": 1755564506,
+        "narHash": "sha256-gKdYh9fLdQwnc+AbR7Nv74eXrItatmhszzKYQvjrt9Y=",
         "owner": "Michael-K-Williams",
         "repo": "VSCode-mutable",
-        "rev": "b30d6559544a31b471c34e55ccd68b27c7a8e201",
+        "rev": "57d6cf0b1742728bcb4e79e5f015ba8c78443049",
         "type": "github"
       },
       "original": {

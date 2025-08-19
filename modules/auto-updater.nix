@@ -69,7 +69,7 @@ let
         fi
         
         # Rebuild system
-        if sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ".#default" --impure; then
+        if sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ".#Katnix-Desktop" --impure; then
             log_message "System update completed successfully"
             echo "$(date +%s)" > "$LAST_UPDATE_FILE"
             
@@ -119,8 +119,11 @@ in {
       
       # Security settings  
       NoNewPrivileges = false;  # Need privileges for ExecStartPre commands
-      PrivateTmp = true;
+      PrivateTmp = false;  # Disable to avoid mount namespace conflicts
       ProtectSystem = "false";  # Disable to avoid mount namespace conflicts
+      PrivateDevices = false;
+      ProtectKernelTunables = false;
+      ProtectControlGroups = false;
       ReadWritePaths = [ "/var/log" "/var/lib/katnix-updater" "${config.users.users.${machineConfig.userName}.home}/nixos" ];
     };
   };
