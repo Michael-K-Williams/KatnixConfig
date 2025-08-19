@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 {
   # Bootloader configuration
   boot.loader = {
@@ -6,7 +6,7 @@
       enable = true;
       efiSupport = true;
       device = "nodev";
-      theme = pkgs.nixos-grub2-theme;
+      theme = inputs.grub-xenlism-nixos.packages.${pkgs.system}.xenlism-grub-1080p-nixos;
     };
     efi.canTouchEfiVariables = true;
   };
