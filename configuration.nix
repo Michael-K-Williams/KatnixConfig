@@ -21,6 +21,7 @@
   # Apply overlays
   nixpkgs.overlays = [
     (inputs.claude-code.overlays.default or (_: _: {}))
+    inputs.vscode-mutable.overlays.default
   ];
 
   # Enable Flatpak
