@@ -4,14 +4,12 @@
   services = {
     xserver = {
       enable = false; # X11 disabled in favor of Wayland
+      displayManager.gdm.enable = true;
       xkb = {
         layout = "gb";
         variant = "";
       };
     };
-    
-    displayManager.gdm.enable = true;
-    displayManager.gdm.wayland = true;
     
     desktopManager.plasma6.enable = true;
     printing.enable = true;
