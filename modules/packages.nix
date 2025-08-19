@@ -121,6 +121,7 @@
     enable = true;
     enableExtensionPack = true;
   };
+  users.extraGroups.vboxusers.members = [ "thealtkitkat" ];
 
   programs.direnv = {
     enable = true;

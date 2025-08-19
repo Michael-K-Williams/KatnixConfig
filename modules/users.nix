@@ -4,7 +4,7 @@
   users.users.${machineConfig.userName} = {
     isNormalUser = true;
     description = machineConfig.userDescription;
-    extraGroups = [ "networkmanager" "wheel" "vboxusers" ];
+    extraGroups = [ "networkmanager" "wheel" ];
   };
 
   # Enable zsh system-wide
