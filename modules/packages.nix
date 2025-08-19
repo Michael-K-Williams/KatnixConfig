@@ -98,6 +98,9 @@
     vlc
     gimp
     
+    # Virtualization
+    virtualbox
+    
     # Katnix command tool
     inputs.katnix-commands.packages.${pkgs.system}.default
     
@@ -111,6 +114,12 @@
     remotePlay.openFirewall = true;
     dedicatedServer.openFirewall = true;
     localNetworkGameTransfers.openFirewall = true;
+  };
+
+  # Enable VirtualBox
+  virtualisation.virtualbox.host = {
+    enable = true;
+    enableExtensionPack = true;
   };
 
   programs.direnv = {
