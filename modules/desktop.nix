@@ -24,5 +24,6 @@
     ark
     khelpcenter
     okular
+    kscreenlocker
   ];
 }

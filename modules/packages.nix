@@ -73,7 +73,6 @@
     
     # KDE packages
     kdePackages.sddm-kcm
-    kdePackages.kscreenlocker
     kdePackages.kcalc
     kdePackages.konversation
     kdePackages.ghostwriter
