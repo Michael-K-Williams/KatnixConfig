@@ -2,7 +2,7 @@
   hostName = "Katnix-Desktop";
   userName = "thealtkitkat";
   userDescription = "Katnix User";
-  backgroundImagePath = ../kat.png;
+  backgroundImagePath = ../nix-dark.png;
   
   # Hardware imports based on graphics type
   hardwareImports = [
