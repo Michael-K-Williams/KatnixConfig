@@ -4,11 +4,9 @@ let
     pname = "xenlism-grub-theme";
     version = "1.0";
     
-    src = pkgs.fetchFromGitHub {
-      owner = "xenlism";
-      repo = "Grub-themes";
-      rev = "096b311f88ba10960f89d42dffa5b4229e752ca2";
-      sha256 = "sha256-t6epuZg89L3cEHE2TgE4mB0WSpwzFl/IUmHCp9ZsOAs=";
+    src = pkgs.fetchzip {
+      url = "https://github.com/xenlism/Grub-themes/archive/096b311f88ba10960f89d42dffa5b4229e752ca2.zip";
+      sha256 = "sha256-kHDYGNM4z8V/JYtBXgAMuf1l/6JSi6YgguSuiuSp2ZY=";
     };
     
     installPhase = ''
