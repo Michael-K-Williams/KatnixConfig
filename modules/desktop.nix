@@ -10,10 +10,8 @@
       };
     };
     
-    displayManager.gdm = {
-      enable = true;
-      wayland = true;
-    };
+    displayManager.gdm.enable = true;
+    displayManager.gdm.wayland = true;
     
     desktopManager.plasma6.enable = true;
     printing.enable = true;
