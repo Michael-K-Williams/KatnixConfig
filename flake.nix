@@ -65,6 +65,8 @@
   in {
     nixosConfigurations = {
       default = mkSystem;
+      "Katnix-Desktop" = mkSystem;
+      "Katnix-Laptop" = mkSystem;
     };
   };
 }
