@@ -100,6 +100,9 @@
     
     # Katnix command tool
     inputs.katnix-commands.packages.${pkgs.system}.default
+    
+    # SDDM theme
+    where-is-my-sddm-theme
   ];
   
   # Enable Steam

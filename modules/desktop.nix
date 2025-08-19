@@ -11,7 +11,13 @@
       };
     };
     
-    displayManager.defaultSession = "plasma";
+    displayManager = {
+      defaultSession = "plasma";
+      sddm = {
+        theme = "where_is_my_sddm_theme";
+        package = pkgs.kdePackages.sddm-kcm;
+      };
+    };
     desktopManager.plasma6.enable = true;
     printing.enable = true;
   };
