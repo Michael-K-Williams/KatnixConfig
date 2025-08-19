@@ -80,6 +80,7 @@
     kdePackages.dolphin
     kdePackages.spectacle
     kdePackages.okular
+    kdePackages.partitionmanager
     
     # Development tools
     # VSCode provided by vscode-mutable module (FHS environment + mutable installation)
