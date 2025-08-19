@@ -3,7 +3,7 @@
   # Desktop environment configuration
   services = {
     xserver = {
-      enable = false; # X11 disabled in favor of Wayland
+      enable = true; # Required for GDM even with Wayland
       displayManager.gdm.enable = true;
       xkb = {
         layout = "gb";
@@ -11,6 +11,7 @@
       };
     };
     
+    displayManager.defaultSession = "plasma";
     desktopManager.plasma6.enable = true;
     printing.enable = true;
   };
