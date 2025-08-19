@@ -12,6 +12,7 @@
     ./modules/users.nix
     ./modules/elite-dangerous.nix
     ./modules/katnix-control.nix
+    ./modules/auto-update.nix
   ] ++ machineConfig.hardwareImports;
 
   # Pass machineConfig to modules that need it
