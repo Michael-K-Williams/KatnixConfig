@@ -114,6 +114,10 @@
     remotePlay.openFirewall = true;
     dedicatedServer.openFirewall = true;
     localNetworkGameTransfers.openFirewall = true;
+    extraCompatPackages = with pkgs; [
+      proton-ge-bin
+      proton-ge-10-12
+    ];
   };
 
   # Enable VirtualBox

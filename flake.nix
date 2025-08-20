@@ -48,10 +48,14 @@
   outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, edhm, edmc, vscode-mutable, zsh-p10k-config, claude-code, katnix-commands, gx52, ... }@inputs: 
   let
     machineConfig = import ./machines/machine.nix;
+    overlay = final: prev: {
+      proton-ge-10-12 = final.callPackage ./pkgs/proton-ge-10-12.nix {};
+    };
     mkSystem = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs machineConfig; };
       modules = [
+        { nixpkgs.overlays = [ overlay ]; }
         ./configuration.nix
         home-manager.nixosModules.home-manager
         edhm.nixosModules.default
