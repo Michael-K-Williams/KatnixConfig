@@ -49,7 +49,7 @@
   let
     machineConfig = import ./machines/machine.nix;
     overlay = final: prev: {
-      proton-ge-10-12 = final.callPackage ./pkgs/proton-ge-10-12.nix {};
+      install-proton-ge-10-12 = final.callPackage ./pkgs/proton-ge-10-12.nix {};
     };
     mkSystem = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";

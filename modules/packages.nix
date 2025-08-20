@@ -104,6 +104,9 @@
     # Katnix command tool
     inputs.katnix-commands.packages.${pkgs.system}.default
     
+    # Proton GE installer script
+    install-proton-ge-10-12
+    
     # SDDM theme
     where-is-my-sddm-theme
   ];
@@ -114,10 +117,6 @@
     remotePlay.openFirewall = true;
     dedicatedServer.openFirewall = true;
     localNetworkGameTransfers.openFirewall = true;
-    extraCompatPackages = with pkgs; [
-      proton-ge-bin
-      proton-ge-10-12
-    ];
   };
 
   # Enable VirtualBox
