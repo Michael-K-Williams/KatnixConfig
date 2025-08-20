@@ -33,5 +33,11 @@
     userName = machineConfig.userName;
   };
 
+  # GX52 Logitech X52 H.O.T.A.S. Control
+  programs.gx52 = {
+    enable = true;
+    addUdevRules = true;  # Allows non-root USB device access
+  };
+
   system.stateVersion = "25.05";
 }

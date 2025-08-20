@@ -39,9 +39,13 @@
       url = "github:Michael-K-Williams/Katnix-Commands";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    gx52 = {
+      url = "github:Michael-K-Williams/gx52Nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, edhm, edmc, vscode-mutable, zsh-p10k-config, claude-code, katnix-commands, ... }@inputs: 
+  outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, edhm, edmc, vscode-mutable, zsh-p10k-config, claude-code, katnix-commands, gx52, ... }@inputs: 
   let
     machineConfig = import ./machines/machine.nix;
     mkSystem = nixpkgs.lib.nixosSystem {
@@ -53,6 +57,7 @@
         edhm.nixosModules.default
         edmc.nixosModules.default
         vscode-mutable.nixosModules.default
+        gx52.nixosModules.default
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
