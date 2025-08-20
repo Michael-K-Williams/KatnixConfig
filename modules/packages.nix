@@ -130,4 +130,44 @@
     enable = true;
     nix-direnv.enable = true;
   };
+
+  # Auto-install Proton GE 10-12 on system activation
+  system.activationScripts.install-proton-ge = {
+    text = ''
+      USER_HOME="/home/thealtkitkat"
+      STEAM_DIR="$USER_HOME/.steam/steam/compatibilitytools.d"
+      PROTON_DIR="$STEAM_DIR/GE-Proton10-12"
+      
+      if [ ! -d "$PROTON_DIR" ]; then
+        echo "Installing Proton GE 10-12..."
+        
+        # Create temp directory
+        TEMP_DIR="/tmp/proton-ge-10-12-install"
+        rm -rf "$TEMP_DIR"
+        mkdir -p "$TEMP_DIR"
+        cd "$TEMP_DIR"
+        
+        # Download tarball
+        ${pkgs.curl}/bin/curl -# -L "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton10-12/GE-Proton10-12.tar.gz" -o "GE-Proton10-12.tar.gz"
+        
+        # Verify checksum
+        echo "47dffcff346b35c75649a95a012ad4e9b6376087dceb43ac7b695e04f5ed3c1e  GE-Proton10-12.tar.gz" | ${pkgs.coreutils}/bin/sha256sum -c
+        
+        # Create steam directory and extract
+        mkdir -p "$STEAM_DIR"
+        ${pkgs.gnutar}/bin/tar -xf "GE-Proton10-12.tar.gz" -C "$STEAM_DIR/"
+        
+        # Set ownership to user
+        chown -R thealtkitkat:users "$STEAM_DIR/GE-Proton10-12"
+        
+        # Cleanup
+        rm -rf "$TEMP_DIR"
+        
+        echo "Proton GE 10-12 installed successfully!"
+      else
+        echo "Proton GE 10-12 already installed."
+      fi
+    '';
+    deps = [];
+  };
 }
