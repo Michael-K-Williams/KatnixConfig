@@ -20,6 +20,15 @@
     };
     desktopManager.plasma6.enable = true;
     printing.enable = true;
+    
+    # Bluetooth
+    blueman.enable = true;
+  };
+  
+  # Enable Bluetooth hardware
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
   };
 
   # Exclude unwanted KDE packages
