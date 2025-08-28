@@ -1,0 +1,264 @@
+#!/usr/bin/env bash
+
+# Katnix - NixOS Configuration Management Tool
+# Usage: katnix [command]
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Configuration
+CONFIG_REPO="https://github.com/Michael-K-Williams/KatnixConfig.git"
+CONFIG_DIR="$HOME/nixos"
+EDIT_DIR="$HOME/git-repos/KatnixConfig"
+
+# Helper functions
+print_usage() {
+    echo -e "${CYAN}Katnix - NixOS Configuration Management Tool${NC}"
+    echo
+    echo -e "${YELLOW}Usage:${NC} katnix [command]"
+    echo
+    echo -e "${YELLOW}Commands:${NC}"
+    echo -e "  ${GREEN}switch${NC}    - Rebuild and switch to new configuration"
+    echo -e "  ${GREEN}update${NC}    - Update flake inputs and switch to new configuration"
+    echo -e "  ${GREEN}git${NC}       - Update configuration from git repository"
+    echo -e "  ${GREEN}edit${NC}      - Clone/pull config to ~/git-repos/ and open in VSCode"
+    echo -e "  ${GREEN}dry${NC}       - Dry run build (check configuration without switching)"
+    echo -e "  ${GREEN}help${NC}      - Show this help message"
+    echo
+    echo -e "${YELLOW}Examples:${NC}"
+    echo -e "  katnix switch"
+    echo -e "  katnix update"
+    echo -e "  katnix edit"
+}
+
+print_header() {
+    echo -e "${PURPLE}═══════════════════════════════════════${NC}"
+    echo -e "${PURPLE}  🐱 Katnix - $1${NC}"
+    echo -e "${PURPLE}═══════════════════════════════════════${NC}"
+}
+
+print_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+# Check if we're running on NixOS
+check_nixos() {
+    if [[ ! -f /etc/nixos/configuration.nix ]] && [[ ! -f /etc/NIXOS ]]; then
+        print_error "This command can only be run on NixOS systems"
+        exit 1
+    fi
+}
+
+# Get the current machine name from hostname
+get_machine_name() {
+    local hostname=$(hostname)
+    case "$hostname" in
+        *-desktop|*Desktop)
+            echo "Katnix-Desktop"
+            ;;
+        *-laptop|*Laptop)
+            echo "Katnix-Laptop"
+            ;;
+        *)
+            # Fallback: capitalize first letter and add Katnix prefix if not present
+            if [[ "$hostname" == Katnix* ]]; then
+                echo "$hostname"
+            else
+                echo "Katnix-$(tr '[:lower:]' '[:upper:]' <<< ${hostname:0:1})${hostname:1}"
+            fi
+            ;;
+    esac
+}
+
+# Ensure config directory exists
+ensure_config_dir() {
+    if [[ ! -d "$CONFIG_DIR" ]]; then
+        print_error "Configuration directory $CONFIG_DIR does not exist"
+        print_info "Run 'katnix git' to clone the configuration first"
+        exit 1
+    fi
+}
+
+# Command implementations
+cmd_switch() {
+    print_header "System Switch"
+    check_nixos
+    ensure_config_dir
+    
+    local machine_name=$(get_machine_name)
+    print_info "Switching to configuration: $machine_name"
+    
+    cd "$CONFIG_DIR"
+    print_info "Running nixos-rebuild switch..."
+    sudo nixos-rebuild switch --flake ".#$machine_name" --impure
+    
+    print_success "System switch completed successfully!"
+}
+
+cmd_update() {
+    print_header "Update & Switch"
+    check_nixos
+    ensure_config_dir
+    
+    local machine_name=$(get_machine_name)
+    print_info "Updating flake inputs and switching to: $machine_name"
+    
+    cd "$CONFIG_DIR"
+    
+    print_info "Updating flake inputs..."
+    sudo nix flake update
+    
+    print_info "Running nixos-rebuild switch..."
+    sudo nixos-rebuild switch --flake ".#$machine_name" --impure
+    
+    print_success "Update and switch completed successfully!"
+}
+
+cmd_git() {
+    print_header "Git Update"
+    
+    if [[ -d "$CONFIG_DIR" ]]; then
+        print_info "Updating existing configuration from git..."
+        cd "$CONFIG_DIR"
+        
+        # Check if there are local changes
+        if ! git diff-index --quiet HEAD --; then
+            print_warning "Local changes detected, stashing them..."
+            git stash push -m "Auto-stash before katnix git update $(date)"
+            print_info "Local changes stashed"
+        fi
+        
+        # Pull latest changes
+        if git pull origin main; then
+            print_success "Configuration updated from git"
+            
+            # Check if there are stashed changes to restore
+            if git stash list | grep -q "Auto-stash before katnix git update"; then
+                print_info "Attempting to restore stashed changes..."
+                if git stash pop; then
+                    print_success "Local changes restored successfully"
+                else
+                    print_warning "Merge conflicts detected in stashed changes"
+                    print_info "Your changes are saved in the stash. Use 'git stash list' to see them"
+                    print_info "Use 'git stash apply' to manually apply them later"
+                fi
+            fi
+        else
+            print_error "Failed to update from git"
+            exit 1
+        fi
+    else
+        print_info "Cloning configuration repository..."
+        git clone "$CONFIG_REPO" "$CONFIG_DIR"
+        print_success "Configuration cloned to $CONFIG_DIR"
+        
+        # Copy hardware configuration if it exists
+        if [[ -f /etc/nixos/hardware-configuration.nix ]]; then
+            print_info "Copying hardware configuration..."
+            sudo cp /etc/nixos/hardware-configuration.nix "$CONFIG_DIR/"
+            sudo chown $USER:users "$CONFIG_DIR/hardware-configuration.nix"
+            print_success "Hardware configuration copied"
+        fi
+    fi
+}
+
+cmd_edit() {
+    print_header "Edit Configuration"
+    
+    # Ensure git-repos directory exists
+    mkdir -p "$HOME/git-repos"
+    
+    if [[ -d "$EDIT_DIR" ]]; then
+        print_info "Updating existing configuration repository..."
+        cd "$EDIT_DIR"
+        git pull origin main
+        print_success "Configuration repository updated"
+    else
+        print_info "Cloning configuration repository for editing..."
+        cd "$HOME/git-repos"
+        git clone "$CONFIG_REPO" "KatnixConfig"
+        print_success "Configuration repository cloned to $EDIT_DIR"
+    fi
+    
+    print_info "Opening configuration in VSCode..."
+    if command -v code &> /dev/null; then
+        code "$EDIT_DIR"
+        print_success "VSCode opened with configuration"
+    else
+        print_warning "VSCode not found in PATH"
+        print_info "Configuration is available at: $EDIT_DIR"
+    fi
+}
+
+cmd_dry() {
+    print_header "Dry Run Build"
+    check_nixos
+    ensure_config_dir
+    
+    local machine_name=$(get_machine_name)
+    print_info "Performing dry run build for: $machine_name"
+    
+    cd "$CONFIG_DIR"
+    print_info "Running nixos-rebuild dry-run..."
+    sudo nixos-rebuild dry-run --flake ".#$machine_name" --impure
+    
+    print_success "Dry run completed successfully!"
+}
+
+# Main command handler
+main() {
+    case "${1:-}" in
+        switch)
+            cmd_switch
+            ;;
+        update)
+            cmd_update
+            ;;
+        git)
+            cmd_git
+            ;;
+        edit)
+            cmd_edit
+            ;;
+        dry)
+            cmd_dry
+            ;;
+        help|--help|-h)
+            print_usage
+            ;;
+        "")
+            print_error "No command specified"
+            echo
+            print_usage
+            exit 1
+            ;;
+        *)
+            print_error "Unknown command: $1"
+            echo
+            print_usage
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

@@ -4,7 +4,6 @@
   imports = [ 
     inputs.plasma-manager.homeManagerModules.plasma-manager
     inputs.nix-flatpak.homeManagerModules.nix-flatpak
-    inputs.zsh-p10k-config.homeManagerModule
   ];
 
   # Home Manager needs a bit of information about you and the paths it should

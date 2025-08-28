@@ -2,7 +2,7 @@
 
 {
   imports = [ 
-    /etc/nixos/hardware-configuration.nix
+    ./hardware-configuration.nix
     ./modules/boot.nix
     ./modules/nix.nix
     ./modules/networking.nix
@@ -20,8 +20,7 @@
 
   # Apply overlays
   nixpkgs.overlays = [
-    (inputs.claude-code.overlays.default or (_: _: {}))
-    inputs.vscode-mutable.overlays.default
+    # Claude-code is now provided via the main overlay in flake.nix
   ];
 
   # Enable Flatpak

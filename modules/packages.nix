@@ -102,7 +102,7 @@
     virtualbox
     
     # Katnix command tool
-    inputs.katnix-commands.packages.${pkgs.system}.default
+    katnix
     
     # Proton GE installer script
     install-proton-ge-10-12
