@@ -16,17 +16,16 @@
   boot.kernelModules = [ "kvm-intel" ];  # Change to "kvm-amd" if using AMD CPU
   boot.extraModulePackages = [ ];
 
-  # File systems - REPLACE WITH YOUR ACTUAL CONFIGURATION
-  # Uncomment and modify these lines with your actual UUIDs:
-  # fileSystems."/" = {
-  #   device = "/dev/disk/by-uuid/YOUR-ROOT-UUID-HERE";
-  #   fsType = "ext4";
-  # };
-  # 
-  # fileSystems."/boot" = {
-  #   device = "/dev/disk/by-uuid/YOUR-BOOT-UUID-HERE";
-  #   fsType = "vfat";
-  # };
+  # File systems - PLACEHOLDER - Replace with your actual configuration
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/00000000-0000-0000-0000-000000000000";  # PLACEHOLDER UUID
+    fsType = "ext4";
+  };
+  
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/0000-0000";  # PLACEHOLDER UUID
+    fsType = "vfat";
+  };
 
   # Swap - REPLACE WITH YOUR ACTUAL CONFIGURATION
   # swapDevices = [ { device = "/dev/disk/by-uuid/YOUR-SWAP-UUID-HERE"; } ];

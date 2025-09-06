@@ -12,8 +12,8 @@ let
   hasIntel = lib.strings.hasInfix "intel" (lib.strings.toLower gpuInfo);
 
 in {
-  # Choose kernel based on GPU
-  boot.kernelPackages = if hasNvidia then pkgs.linuxPackages else pkgs.linuxPackages_latest;
+  # Choose kernel based on GPU - can be overridden in config.nix
+  boot.kernelPackages = lib.mkDefault (if hasNvidia then pkgs.linuxPackages else pkgs.linuxPackages_latest);
 
   services.xserver = {
     # Set video drivers based on detected hardware
