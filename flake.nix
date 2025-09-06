@@ -13,6 +13,12 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
 
+    # Custom packages overlay
+    my-custom-packages = {
+        url = "github:Michael-K-Williams/my-custom-packages";
+        inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   	};
 
   outputs = 
@@ -26,10 +32,14 @@
        	config = {
        	allowUnfree = true;
        	};
+       	overlays = [
+       	  inputs.my-custom-packages.overlays.default
+       	];
       };
 
     # Helper function to create a machine configuration
     mkMachine = host: nixpkgs.lib.nixosSystem rec {
+      inherit system;
       specialArgs = { 
         inherit system;
         inherit inputs;
@@ -40,6 +50,12 @@
         ./hosts/${host}/config.nix 
         # inputs.distro-grub-themes.nixosModules.${system}.default
         ./modules/quickshell.nix  # quickshell module
+        # Apply custom packages overlay
+        ({ config, pkgs, ... }: {
+          nixpkgs.overlays = [
+            inputs.my-custom-packages.overlays.default
+          ];
+        })
       ];
     };
 

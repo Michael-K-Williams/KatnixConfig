@@ -84,6 +84,35 @@
     yad
     yt-dlp
 
+    # Gaming and Applications from original config
+    vesktop
+    spotify
+    lutris
+    gamescope
+    gamemode
+    space-station-14-launcher
+    starsector
+    thunderbird
+    obs-studio
+    
+    # Development tools
+    claude-code
+    gh
+    
+    # KDE applications
+    kdePackages.kate
+    kdePackages.ghostwriter
+    kdePackages.sweeper
+    kdePackages.kmail
+    kdePackages.plasmatube
+    kdePackages.dolphin
+    
+    # X11 utilities for compatibility
+    xorg.xhost
+    
+    # Fonts for better compatibility
+    oxygenfonts
+
     #waybar  # if wanted experimental next line
     #(pkgs.waybar.overrideAttrs (oldAttrs: { mesonFlags = oldAttrs.mesonFlags ++ [ "-Dexperimental=true" ];}))
   ]) ++ [
@@ -124,6 +153,15 @@ fonts = {
 	  git.enable = true;
     nm-applet.indicator = true;
     #neovim.enable = true;
+    
+    # GX52 controller support
+    gx52 = {
+      enable = true;
+      users = [ "alternativekitkat" ];
+    };
+    
+    # Development environment
+    direnv.enable = true;
 
 	  thunar.enable = true;
 	  thunar.plugins = with pkgs.xfce; [
