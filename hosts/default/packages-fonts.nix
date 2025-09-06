@@ -154,11 +154,11 @@ fonts = {
     nm-applet.indicator = true;
     #neovim.enable = true;
     
-    # GX52 controller support
-    gx52 = {
-      enable = true;
-      users = [ "alternativekitkat" ];
-    };
+    # GX52 controller support - currently disabled pending custom packages setup
+    # gx52 = {
+    #   enable = true;
+    #   users = [ "alternativekitkat" ];
+    # };
     
     # Development environment
     direnv.enable = true;

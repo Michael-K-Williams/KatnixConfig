@@ -13,11 +13,11 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
 
-    # Custom packages overlay
-    my-custom-packages = {
-        url = "github:Michael-K-Williams/my-custom-packages";
-        inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # Custom packages overlay - currently disabled pending repository setup
+    # my-custom-packages = {
+    #     url = "github:Michael-K-Williams/my-custom-packages";
+    #     inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
   	};
 
@@ -32,9 +32,9 @@
        	config = {
        	allowUnfree = true;
        	};
-       	overlays = [
-       	  inputs.my-custom-packages.overlays.default
-       	];
+       	# overlays = [
+       	#   inputs.my-custom-packages.overlays.default
+       	# ];
       };
 
     # Helper function to create a machine configuration
@@ -50,12 +50,12 @@
         ./hosts/${host}/config.nix 
         # inputs.distro-grub-themes.nixosModules.${system}.default
         ./modules/quickshell.nix  # quickshell module
-        # Apply custom packages overlay
-        ({ config, pkgs, ... }: {
-          nixpkgs.overlays = [
-            inputs.my-custom-packages.overlays.default
-          ];
-        })
+        # Apply custom packages overlay - currently disabled
+        # ({ config, pkgs, ... }: {
+        #   nixpkgs.overlays = [
+        #     inputs.my-custom-packages.overlays.default
+        #   ];
+        # })
       ];
     };
 
